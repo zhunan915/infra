@@ -76,8 +76,8 @@ module "eks" {
   subnet_ids = aws_subnet.public[*].id
 
   cluster_endpoint_public_access = true
- 
-  create_iam_role = false 
+
+  create_iam_role = false
   iam_role_name = "LabRole"
   iam_role_use_name_prefix = false
 
@@ -89,6 +89,8 @@ module "eks" {
 
       instance_types = ["t3.medium"]
       vpc_security_group_ids = [aws_security_group.eks.id]
+
+      iam_role_arn = "arn:aws:iam::781942218065:role/LabRole"  
     }
   }
 }
