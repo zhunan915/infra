@@ -1,44 +1,9 @@
-resource "aws_iam_role" "vpc_creator_role" {
-  name = "VpcCreatorRole"
+resource "aws_vpc" "this" {
+  cidr_block = "10.0.0.0/16"
 
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Effect = "Allow"
-        Principal = {
-          Service = "ec2.amazonaws.com"  # <-- Let EC2 assume this role (or whatever you want later)
-        }
-        Action = "sts:AssumeRole"
-      }
-    ]
-  })
-
-  description = "Role for creating VPCs"
+  tags = {
+    Name = "my-vpc"
+  }
 }
 
-resource "aws_iam_role_policy" "vpc_creator_policy" {
-  role = aws_iam_role.vpc_creator_role.id
-
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Effect = "Allow"
-        Action = [
-          "ec2:CreateVpc",
-          "ec2:CreateSubnet",
-          "ec2:CreateInternetGateway",
-          "ec2:CreateRouteTable",
-          "ec2:AssociateRouteTable",
-          "ec2:CreateSecurityGroup",
-          "ec2:AuthorizeSecurityGroupIngress",
-          "ec2:AuthorizeSecurityGroupEgress",
-          "ec2:CreateTags"
-        ]
-        Resource = "*"
-      }
-    ]
-  })
-}
 
