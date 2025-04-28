@@ -93,7 +93,7 @@ module "eks" {
       iam_role_arn = "arn:aws:iam::781942218065:role/LabRole"  
 
       create_iam_role = false   
-      iam_role_additional_policies = [] 
+      iam_role_additional_policies = {}
     }
   }
 }
