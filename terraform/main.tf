@@ -81,8 +81,6 @@ module "eks" {
   iam_role_name = "LabRole"
   iam_role_use_name_prefix = false
 
-  cluster_iam_role_arn = "arn:aws:iam::781942218065:role/LabRole"  
-
   eks_managed_node_groups = {
     default = {
       desired_size = 2
