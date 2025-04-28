@@ -1,4 +1,3 @@
-
 resource "aws_iam_role" "vpc_creator_role" {
   name = "VpcCreatorRole"
 
@@ -8,14 +7,14 @@ resource "aws_iam_role" "vpc_creator_role" {
       {
         Effect = "Allow"
         Principal = {
-          AWS = "arn:aws:iam::781942218065:role/LabRole"
+          Service = "ec2.amazonaws.com"  # <-- Let EC2 assume this role (or whatever you want later)
         }
         Action = "sts:AssumeRole"
       }
     ]
   })
 
-  description = "Role for creating VPCs, trusted by LabRole"
+  description = "Role for creating VPCs"
 }
 
 resource "aws_iam_role_policy" "vpc_creator_policy" {
@@ -42,3 +41,4 @@ resource "aws_iam_role_policy" "vpc_creator_policy" {
     ]
   })
 }
+
