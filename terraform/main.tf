@@ -1,33 +1,28 @@
-# Create VPC
+# VPC
 resource "aws_vpc" "this" {
-  cidr_block           = var.vpc_cidr
+  cidr_block = "10.0.0.0/16"
   enable_dns_support   = true
   enable_dns_hostnames = true
-
-  tags = {
-    Name = "${var.cluster_name}-vpc"
-  }
 }
 
-# Create Public Subnets
-resource "aws_subnet" "public" {
-  count                   = length(var.public_subnets)
-  vpc_id                  = aws_vpc.this.id
-  cidr_block              = element(var.public_subnets, count.index)
-  availability_zone       = element(var.azs, count.index)
-  map_public_ip_on_launch = true
-
-  tags = {
-    Name = "${var.cluster_name}-public-subnet-${count.index}"
-  }
-}
-
-# Create Internet Gateway
+# Internet Gateway
 resource "aws_internet_gateway" "this" {
   vpc_id = aws_vpc.this.id
 }
 
-# Create Public Route Table
+# Public Subnets 
+resource "aws_subnet" "public" {
+  count                   = 3
+  vpc_id                  = aws_vpc.this.id
+  cidr_block              = cidrsubnet(aws_vpc.this.cidr_block, 8, count.index)
+  availability_zone       = data.aws_availability_zones.available.names[count.index]
+  map_public_ip_on_launch = true
+}
+
+
+data "aws_availability_zones" "available" {}
+
+# Route Table for Public Subnets
 resource "aws_route_table" "public" {
   vpc_id = aws_vpc.this.id
 
@@ -37,19 +32,20 @@ resource "aws_route_table" "public" {
   }
 }
 
-# Associate Route Table to Subnets
 resource "aws_route_table_association" "public" {
-  count          = length(aws_subnet.public)
+  count          = 3
   subnet_id      = aws_subnet.public[count.index].id
   route_table_id = aws_route_table.public.id
 }
 
-# Create Security Group for EKS
+# Security Group for EKS
 resource "aws_security_group" "eks" {
-  vpc_id = aws_vpc.this.id
-  name   = "${var.cluster_name}-sg"
+  name        = "${var.cluster_name}-sg"
+  description = "EKS security group"
+  vpc_id      = aws_vpc.this.id
 
   ingress {
+    description = "Allow all traffic"
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
@@ -57,6 +53,7 @@ resource "aws_security_group" "eks" {
   }
 
   egress {
+    description = "Allow all outbound"
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
@@ -64,35 +61,33 @@ resource "aws_security_group" "eks" {
   }
 }
 
-# Create EKS Cluster using existing LabRole
-module "eks" {
-  source  = "terraform-aws-modules/eks/aws"
-  version = "20.8.4"
+# EKS Cluster
+resource "aws_eks_cluster" "this" {
+  name     = var.cluster_name
+  role_arn = "arn:aws:iam::781942218065:role/LabRole"
 
-  cluster_name    = var.cluster_name
-  cluster_version = "1.29"
-
-  vpc_id     = aws_vpc.this.id
-  subnet_ids = aws_subnet.public[*].id
-
-  cluster_endpoint_public_access = true
-
-  create_iam_role = false
-  iam_role_name = "LabRole"
-  iam_role_use_name_prefix = false
-
-  eks_managed_node_groups = {
-    default = {
-      desired_size = 2
-      max_size     = 3
-      min_size     = 2
-
-      instance_types = ["t3.medium"]
-      vpc_security_group_ids = [aws_security_group.eks.id]
-
-      create_iam_role = false
-      iam_role_arn = "arn:aws:iam::781942218065:role/LabRole"
-      iam_role_additional_policies = {}  # <-- use empty map
-    }
+  vpc_config {
+    subnet_ids              = aws_subnet.public[*].id
+    security_group_ids      = [aws_security_group.eks.id]
+    endpoint_public_access  = true
   }
+
+  version = "1.30"
+
+}
+
+# EKS Node Group
+resource "aws_eks_node_group" "default" {
+  cluster_name    = aws_eks_cluster.this.name
+  node_group_name = "default-node-group"
+  node_role_arn   = "arn:aws:iam::781942218065:role/LabRole"
+  subnet_ids      = aws_subnet.public[*].id
+
+  scaling_config {
+    desired_size = 2
+    max_size     = 3
+    min_size     = 2
+  }
+
+  instance_types = ["t3.medium"]
 }

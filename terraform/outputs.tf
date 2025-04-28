@@ -1,19 +1,11 @@
-output "vpc_id" {
-  value = aws_vpc.this.id
+output "cluster_name" {
+  value = aws_eks_cluster.this.name
 }
 
-output "public_subnet_ids" {
-  value = aws_subnet.public[*].id
+output "cluster_endpoint" {
+  value = aws_eks_cluster.this.endpoint
 }
 
-output "eks_cluster_name" {
-  value = module.eks.cluster_name
-}
-
-output "eks_cluster_endpoint" {
-  value = module.eks.cluster_endpoint
-}
-
-output "eks_nodegroup_role_arn" {
-  value = module.eks.eks_managed_node_groups.default.iam_role_arn
+output "cluster_certificate_authority_data" {
+  value = aws_eks_cluster.this.certificate_authority[0].data
 }
