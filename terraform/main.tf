@@ -1,7 +1,7 @@
 # Create VPC
 resource "aws_vpc" "this" {
-  cidr_block = var.vpc_cidr
-  enable_dns_support = true
+  cidr_block           = var.vpc_cidr
+  enable_dns_support   = true
   enable_dns_hostnames = true
 
   tags = {
@@ -90,10 +90,9 @@ module "eks" {
       instance_types = ["t3.medium"]
       vpc_security_group_ids = [aws_security_group.eks.id]
 
-      iam_role_arn = "arn:aws:iam::781942218065:role/LabRole"  
-
-      create_iam_role = false   
-      iam_role_additional_policies = {}
+      create_iam_role = false
+      iam_role_arn = "arn:aws:iam::781942218065:role/LabRole"
+      iam_role_additional_policies = {}  # <-- use empty map
     }
   }
 }
