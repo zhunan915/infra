@@ -1,19 +1,9 @@
-output "vpc_id" {
-  value = aws_vpc.this.id
+output "vpc_creator_role_arn" {
+  description = "ARN of the created VPC Creator Role"
+  value       = aws_iam_role.vpc_creator_role.arn
 }
 
-output "public_subnet_ids" {
-  value = aws_subnet.public[*].id
-}
-
-output "eks_cluster_name" {
-  value = module.eks.cluster_name
-}
-
-output "eks_cluster_endpoint" {
-  value = module.eks.cluster_endpoint
-}
-
-output "eks_nodegroup_role_arn" {
-  value = module.eks.eks_managed_node_groups.default.iam_role_arn
+output "vpc_creator_role_name" {
+  description = "Name of the created VPC Creator Role"
+  value       = aws_iam_role.vpc_creator_role.name
 }
