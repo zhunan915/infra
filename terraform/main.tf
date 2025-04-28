@@ -77,6 +77,10 @@ module "eks" {
 
   cluster_endpoint_public_access = true
 
+  manage_aws_auth = false   
+  iam_role_name = "LabRole"
+  iam_role_use_name_prefix = false
+
   eks_managed_node_groups = {
     default = {
       desired_size = 2
