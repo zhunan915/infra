@@ -77,6 +77,7 @@ module "eks" {
 
   cluster_endpoint_public_access = true
  
+  create_iam_role = false 
   iam_role_name = "LabRole"
   iam_role_use_name_prefix = false
 
