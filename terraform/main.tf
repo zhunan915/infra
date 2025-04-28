@@ -91,6 +91,9 @@ module "eks" {
       vpc_security_group_ids = [aws_security_group.eks.id]
 
       iam_role_arn = "arn:aws:iam::781942218065:role/LabRole"  
+
+      create_iam_role = false   
+      iam_role_additional_policies = [] 
     }
   }
 }
